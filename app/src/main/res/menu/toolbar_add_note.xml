@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/tb_camera"
+        android:icon="@drawable/tb_camera"
+        app:showAsAction="ifRoom"
+        android:title="Camera" />
+
+    <item
+        android:id="@+id/tb_color"
+        android:icon="@drawable/tb_choose_color"
+        app:showAsAction="ifRoom"
+        android:title="Grid" />
+
+    <item
+        android:id="@+id/tb_done"
+        android:icon="@drawable/tb_done"
+        app:showAsAction="ifRoom"
+        android:title="Done" />
+
+</menu>
