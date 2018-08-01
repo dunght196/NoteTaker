@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -18,13 +19,14 @@ import dunght.example.com.notetaker.R;
 import dunght.example.com.notetaker.config.Define;
 import dunght.example.com.notetaker.custom.adapter.NoteAdapter;
 import dunght.example.com.notetaker.db.db.table.NoteData;
+import dunght.example.com.notetaker.db.db.table.PhotoData;
 import dunght.example.com.notetaker.model.Note;
 
 public class MainActivity extends AppCompatActivity {
 
     private android.support.v7.widget.Toolbar toolbar;
     private GridView gvNote;
-    private NoteData noteData;
+    private TextView tvNonote;
     private ArrayList<Note> listNote;
 
     @Override
@@ -32,19 +34,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        toolbar.setNavigationIcon(R.drawable.tb_note);
-        gvNote = (GridView)findViewById(R.id.gv_note);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        gvNote = findViewById(R.id.gv_note);
+        tvNonote = (TextView)findViewById(R.id.tv_no_note);
 
-        //aaaa
+        NoteData.Instance(this);
+        PhotoData.Instance(this);
+        listNote = NoteData.Instance(this).getAllNote();
 
-        noteData = new NoteData(this);
-        listNote = noteData.getAllNote();
-
-        NoteAdapter noteAdapter = new NoteAdapter(this, listNote);
-        gvNote.setAdapter(noteAdapter);
+        if(listNote.size()!=0) {
+            NoteAdapter noteAdapter = new NoteAdapter(this, listNote);
+            gvNote.setAdapter(noteAdapter);
+            gvNote.setVisibility(View.VISIBLE);
+            tvNonote.setVisibility(View.INVISIBLE);
+        }else {
+            gvNote.setVisibility(View.INVISIBLE);
+            tvNonote.setVisibility(View.VISIBLE);
+        }
 
         gvNote.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -54,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
 
     }
 
