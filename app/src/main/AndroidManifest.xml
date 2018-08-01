@@ -28,8 +28,8 @@
         <service android:name=".service.NoteService" />
 
         <activity android:name=".activity.base.EditNoteActivity"
-            android:windowSoftInputMode="adjustPan"
-            ></activity>
+            android:windowSoftInputMode="adjustPan">
+        </activity>
     </application>
 
 </manifest>

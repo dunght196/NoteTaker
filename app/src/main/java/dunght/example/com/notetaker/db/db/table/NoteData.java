@@ -17,11 +17,19 @@ public class NoteData {
     private SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase sqLiteDatabase;
     private Context context;
+    private static NoteData instance = null;
 
 
     public NoteData(Context context) {
         this.context = context;
         sqLiteOpenHelper = new DatabaseManager(context);
+    }
+
+    public static NoteData Instance(Context context) {
+        if(instance == null) {
+            instance = new NoteData(context);
+        }
+        return instance;
     }
 
     public void add(Note note) {

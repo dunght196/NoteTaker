@@ -16,9 +16,17 @@ public class PhotoData {
 
     private SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase sqLiteDatabase;
+    private static PhotoData instance = null;
 
     public PhotoData(Context context) {
         sqLiteOpenHelper = new DatabaseManager(context);
+    }
+
+    public static PhotoData Instance(Context context) {
+        if(instance == null) {
+            instance = new PhotoData(context);
+        }
+        return  instance;
     }
 
     public void add(String photo,int id ) {
