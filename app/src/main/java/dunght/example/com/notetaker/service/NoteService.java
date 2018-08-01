@@ -35,12 +35,13 @@ public class NoteService extends Service {
         builder.setContentText(title);
         builder.setAutoCancel(true);
 
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(100, builder.build());
-
         Intent intentAction = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivities(this, 0, new Intent[]{intentAction}, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pendingIntent);
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(100, builder.build());
+
 
         return START_NOT_STICKY;
     }

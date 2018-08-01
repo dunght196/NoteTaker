@@ -7,10 +7,13 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,8 +53,6 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
     private ArrayList<String> listPhoto;
     private ArrayList<Note> listNote;
     private PhotoAdapter photoAdapter;
-    private NoteData dataNote;
-    private PhotoData dataPhoto;
     private AlarmManager alarmManager;
 
 
@@ -77,19 +78,48 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
         ivDeleteItem = (ImageView)findViewById(R.id.iv_delete_item);
         ivNextItem = (ImageView)findViewById(R.id.iv_next_item);
 
-        dataNote = new NoteData(this);
-        dataPhoto = new PhotoData(this);
-
         posNote = getIntent().getIntExtra(Define.POSITION,0);
 
-        listNote = dataNote.getAllNote();
+        listNote = NoteData.Instance(this).getAllNote();
 
         calendar = Calendar.getInstance();
         alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-
         initDatetime();
 
         detailItem(posNote);
+
+        tvDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(EditNoteActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        tvDate.setText(dayOfMonth + "/" + (month + 1) + "/" + year + " • ");
+                        calendar.set(Calendar.YEAR, view.getYear());
+                        calendar.set(Calendar.MONTH, view.getMonth());
+                        calendar.set(Calendar.DAY_OF_MONTH, view.getDayOfMonth());
+                    }
+                }, year, month, day);
+                datePickerDialog.show();
+            }
+        });
+
+        tvTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(EditNoteActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        tvTime.setText(hourOfDay + ":" + minute);
+                        calendar.set(Calendar.HOUR_OF_DAY, view.getCurrentHour());
+                        calendar.set(Calendar.MINUTE, view.getCurrentMinute());
+                        calendar.set(Calendar.SECOND, 0);
+                    }
+                }, hour, minute, true);
+
+                timePickerDialog.show();
+            }
+        });
 
         ivBackTB.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,8 +151,8 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
             @Override
             public void onClick(View view) {
                 cancelAlarm(listNote.get(posNote).getId());
-                dataNote.delete(listNote.get(posNote));
-                dataPhoto.delete(listNote.get(posNote).getId());
+                NoteData.Instance(getApplicationContext()).delete(listNote.get(posNote));
+                PhotoData.Instance(getApplicationContext()).delete(listNote.get(posNote).getId());
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
         });
@@ -199,6 +229,7 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
                     public void onClick(View view) {
                         Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(takePicture, Define.PICK_CAMERA_REQUEST);
+                        dialog.cancel();
                     }
                 });
 
@@ -267,49 +298,17 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
     public void detailItem(int pos) {
         tvTitle.setText(listNote.get(pos).getTitle());
         tvDatetime.setText(listNote.get(pos).getDatetimeCreate());
-
         tvDate.setText(listNote.get(pos).getDateAlarm());
-        tvDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(EditNoteActivity.this, new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-                        tvDate.setText(dayOfMonth + "/" + (month + 1) + "/" + year + " • ");
-                        calendar.set(Calendar.YEAR, view.getYear());
-                        calendar.set(Calendar.MONTH, view.getMonth());
-                        calendar.set(Calendar.DAY_OF_MONTH, view.getDayOfMonth());
-                    }
-                }, year, month, day);
-                datePickerDialog.show();
-            }
-        });
-
         tvTime.setText(listNote.get(pos).getTimeAlarm());
-        tvTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerDialog timePickerDialog = new TimePickerDialog(EditNoteActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        tvTime.setText(hourOfDay + ":" + minute);
-                        calendar.set(Calendar.HOUR_OF_DAY, view.getCurrentHour());
-                        calendar.set(Calendar.MINUTE, view.getCurrentMinute());
-                        calendar.set(Calendar.SECOND, 0);
-                    }
-                }, hour, minute, true);
-
-                timePickerDialog.show();
-            }
-        });
-
         etTitle.setText(listNote.get(pos).getTitle());
         etNote.setText(listNote.get(pos).getContent());
         getWindow().getDecorView().setBackgroundColor(listNote.get(pos).getColor());
 
-        listPhoto = dataPhoto.getAllPhotoByIDNote(listNote.get(pos).getId());
+        listPhoto = PhotoData.Instance(this).getAllPhotoByIDNote(listNote.get(pos).getId());
         photoAdapter = new PhotoAdapter(this,this, listPhoto);
         gvPhoto.setAdapter(photoAdapter);
+
+//        updateGVPhoto(pos);
 
         if(listNote.size() == 1) {
             ivBackItem.setAlpha(0.1f);
@@ -331,44 +330,51 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
             ivBackItem.setAlpha(1f);
             ivNextItem.setEnabled(true);
             ivBackItem.setEnabled(true);
-
         }
     }
 
     public void changedataPhoto(int id) {
-        dataPhoto.delete(id);
+        PhotoData.Instance(this).delete(id);
         for(String s : listPhoto) {
-            dataPhoto.add(s, listNote.get(posNote).getId());
+            PhotoData.Instance(this).add(s, listNote.get(posNote).getId());
         }
     }
+
+//    public void updateGVPhoto(final int pos) {
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                listPhoto = PhotoData.Instance(getApplicationContext()).getAllPhotoByIDNote(listNote.get(pos).getId());
+//                handler.sendEmptyMessage(0);
+//            }
+//        }.start();
+//    }
 
     public void saveNote() {
         String title = etTitle.getText().toString();
         String content = etNote.getText().toString();
-        String datetimeCreate = tvDatetime.getText().toString();
         String dateAlarm = tvDate.getText().toString();
         String timeAlarm = tvTime.getText().toString();
 
         Note note = listNote.get(posNote);
+        changedataPhoto(note.getId());
+
+        if(!note.getTimeAlarm().equals(timeAlarm)) {
+            Intent intent = new Intent(EditNoteActivity.this, NoteReceiver.class);
+            intent.putExtra(Define.TITLE_NOTE, title);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                    getApplicationContext(), note.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT
+            );
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+        }
+
         note.setTitle(title);
         note.setContent(content);
         note.setDateAlarm(dateAlarm);
         note.setTimeAlarm(timeAlarm);
         note.setColor(colorNote);
+        NoteData.Instance(this).update(note);
 
-        dataNote.update(note);
-
-        changedataPhoto(note.getId());
-
-        Intent intent = new Intent(EditNoteActivity.this, NoteReceiver.class);
-
-        intent.putExtra(Define.TITLE_NOTE, title);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                getApplicationContext(), posNote, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
-
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
         startActivity(new Intent(getApplicationContext(), MainActivity.class));
     }
 

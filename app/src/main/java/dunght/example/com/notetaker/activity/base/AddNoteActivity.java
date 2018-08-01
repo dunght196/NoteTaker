@@ -52,8 +52,6 @@ public class AddNoteActivity extends AppCompatActivity implements OnClickInterfa
     private int colorNote = -1;
     private ArrayList<String> listPhoto;
     private PhotoAdapter photoAdapter;
-    private NoteData dataNote;
-    private PhotoData dataPhoto;
     private AlarmManager alarmManager;
 
 
@@ -118,9 +116,6 @@ public class AddNoteActivity extends AppCompatActivity implements OnClickInterfa
         listPhoto = new ArrayList<>();
         photoAdapter = new PhotoAdapter(this,this, listPhoto);
         gvPhoto.setAdapter(photoAdapter);
-
-        dataNote = new NoteData(this);
-        dataPhoto = new PhotoData(this);
 
         alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
 
@@ -189,6 +184,7 @@ public class AddNoteActivity extends AppCompatActivity implements OnClickInterfa
                     public void onClick(View view) {
                         Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         startActivityForResult(takePicture, Define.PICK_CAMERA_REQUEST);
+                        dialog.cancel();
                     }
                 });
 
@@ -229,13 +225,13 @@ public class AddNoteActivity extends AppCompatActivity implements OnClickInterfa
 
         Note note = new Note(title, content, colorNote, datetimeCreate, dateAlarm, timeAlarm);
         note.setListImage(listPhoto);
-        dataNote.add(note);
+        NoteData.Instance(this).add(note);
 
         for(int i=0;i<note.getListImage().size();i++){
-            dataPhoto.add(note.getListImage().get(i), dataNote.getLastId());
+            PhotoData.Instance(this).add(note.getListImage().get(i), NoteData.Instance(this).getLastId());
         }
 
-        Define.REQUEST_CODE = dataNote.getLastId();
+        Define.REQUEST_CODE = NoteData.Instance(this).getLastId();
 
         Intent intent = new Intent(AddNoteActivity.this, NoteReceiver.class);
 
