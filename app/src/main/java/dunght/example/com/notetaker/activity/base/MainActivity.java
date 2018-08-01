@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setNavigationIcon(R.drawable.tb_note);
         gvNote = (GridView)findViewById(R.id.gv_note);
 
+        //aaaa
+
         noteData = new NoteData(this);
         listNote = noteData.getAllNote();
 
