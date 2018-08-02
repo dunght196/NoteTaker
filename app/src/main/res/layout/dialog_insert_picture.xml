@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-
     <TextView
         android:text="Insert Picture"
         android:padding="@dimen/_12sdp"
@@ -13,7 +12,6 @@
         android:layout_height="wrap_content"
         android:textColor="@android:color/holo_blue_light"
         android:textSize="20sp"/>
-
 
     <View
         android:layout_width="match_parent"
@@ -65,7 +63,5 @@
             android:text="Choose Photo"/>
 
     </LinearLayout>
-
-
 
 </LinearLayout>

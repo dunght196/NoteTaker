@@ -1,4 +1,4 @@
-package dunght.example.com.notetaker.config;
+package dunght.example.com.notetaker.controller;
 
 public interface OnClickInterface {
 

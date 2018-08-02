@@ -7,13 +7,10 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +28,7 @@ import java.util.Calendar;
 
 import dunght.example.com.notetaker.R;
 import dunght.example.com.notetaker.config.Define;
-import dunght.example.com.notetaker.config.OnClickInterface;
+import dunght.example.com.notetaker.controller.OnClickInterface;
 import dunght.example.com.notetaker.custom.adapter.PhotoAdapter;
 import dunght.example.com.notetaker.db.db.table.NoteData;
 import dunght.example.com.notetaker.db.db.table.PhotoData;
@@ -48,7 +45,7 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
     private GridView gvPhoto;
     private Calendar calendar;
     private int day, month, year, hour, minute;
-    private int colorNote = -1;
+    private int colorNote;
     private int  posNote;
     private ArrayList<String> listPhoto;
     private ArrayList<Note> listNote;
@@ -304,11 +301,10 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
         etNote.setText(listNote.get(pos).getContent());
         getWindow().getDecorView().setBackgroundColor(listNote.get(pos).getColor());
 
+        colorNote = listNote.get(pos).getColor();
         listPhoto = PhotoData.Instance(this).getAllPhotoByIDNote(listNote.get(pos).getId());
         photoAdapter = new PhotoAdapter(this,this, listPhoto);
         gvPhoto.setAdapter(photoAdapter);
-
-//        updateGVPhoto(pos);
 
         if(listNote.size() == 1) {
             ivBackItem.setAlpha(0.1f);
@@ -339,16 +335,6 @@ public class EditNoteActivity extends AppCompatActivity implements OnClickInterf
             PhotoData.Instance(this).add(s, listNote.get(posNote).getId());
         }
     }
-
-//    public void updateGVPhoto(final int pos) {
-//        new Thread(){
-//            @Override
-//            public void run() {
-//                listPhoto = PhotoData.Instance(getApplicationContext()).getAllPhotoByIDNote(listNote.get(pos).getId());
-//                handler.sendEmptyMessage(0);
-//            }
-//        }.start();
-//    }
 
     public void saveNote() {
         String title = etTitle.getText().toString();

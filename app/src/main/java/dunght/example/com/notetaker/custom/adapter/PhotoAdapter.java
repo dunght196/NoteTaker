@@ -1,20 +1,19 @@
 package dunght.example.com.notetaker.custom.adapter;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
-import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-
-import java.io.InputStream;
+import com.nostra13.universalimageloader.cache.memory.impl.WeakMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import java.util.ArrayList;
-
 import dunght.example.com.notetaker.R;
-import dunght.example.com.notetaker.config.OnClickInterface;
+import dunght.example.com.notetaker.controller.OnClickInterface;
 
 
 public class PhotoAdapter extends BaseAdapter{
@@ -47,16 +46,27 @@ public class PhotoAdapter extends BaseAdapter{
     @Override
     public View getView(final int i, View convertView, ViewGroup viewGroup) {
         try {
-            Uri uri = Uri.parse(listPhoto.get(i));
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
-            InputStream imageStream = activity.getContentResolver().openInputStream(uri);
-            Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-
-            convertView = activity.getLayoutInflater().inflate(R.layout.custom_gridview_photo, null);
+            convertView = activity.getLayoutInflater().inflate(R.layout.item_photo, null);
             ImageView ivPhoto = (ImageView)convertView.findViewById(R.id.iv_custom_photo);
             ImageView ivClose = (ImageView)convertView.findViewById(R.id.iv_custom_close);
 
-            ivPhoto.setImageBitmap(selectedImage);
+            String url = listPhoto.get(i);
+
+            //Using universalimageloader
+            DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+                    .cacheOnDisc(true).cacheInMemory(true)
+                    .imageScaleType(ImageScaleType.EXACTLY)
+                    .displayer(new FadeInBitmapDisplayer(100)).build();
+
+            ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(activity)
+                    .defaultDisplayImageOptions(defaultOptions)
+                    .memoryCache(new WeakMemoryCache())
+                    .discCacheSize(100 * 1024 * 1024).build();
+
+            ImageLoader imageLoader = ImageLoader.getInstance();
+            imageLoader.init(config);
+            imageLoader.displayImage(url, ivPhoto);
+
             ivClose.setImageResource(R.drawable.ic_close);
 
             ivClose.setOnClickListener(new View.OnClickListener() {

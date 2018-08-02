@@ -6,13 +6,11 @@ import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +30,7 @@ import java.util.Date;
 
 import dunght.example.com.notetaker.R;
 import dunght.example.com.notetaker.config.Define;
-import dunght.example.com.notetaker.config.OnClickInterface;
+import dunght.example.com.notetaker.controller.OnClickInterface;
 import dunght.example.com.notetaker.custom.adapter.PhotoAdapter;
 import dunght.example.com.notetaker.db.db.table.NoteData;
 import dunght.example.com.notetaker.db.db.table.PhotoData;
@@ -211,9 +209,31 @@ public class AddNoteActivity extends AppCompatActivity implements OnClickInterfa
     }
 
     @Override
-    public void click(int pos) {
-        listPhoto.remove(pos);
-        photoAdapter.notifyDataSetChanged();
+    public void click(final int pos) {
+        final Dialog dialog = new Dialog(AddNoteActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);;
+        dialog.setTitle("Confirm Delete");
+        dialog.setContentView(R.layout.dialog_delete);
+        dialog.show();
+
+        TextView tvOk = (TextView)dialog.findViewById(R.id.tv_ok);
+        TextView tvCancel = (TextView)dialog.findViewById(R.id.tv_cancel);
+
+        tvOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listPhoto.remove(pos);
+                photoAdapter.notifyDataSetChanged();
+                dialog.cancel();
+            }
+        });
+
+        tvCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.cancel();
+            }
+        });
     }
 
     public void saveNote() {

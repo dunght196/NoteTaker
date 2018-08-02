@@ -40,7 +40,7 @@ public class NoteAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int i, View convertView, ViewGroup viewGroup) {
-        convertView = activity.getLayoutInflater().inflate(R.layout.custom_gridview_note, null);
+        convertView = activity.getLayoutInflater().inflate(R.layout.item_note, null);
 
         TextView tvTitle = (TextView)convertView.findViewById(R.id.tv_title_custom);
         TextView tvContent = (TextView)convertView.findViewById(R.id.tv_content_custom);
